@@ -685,6 +685,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         assert(0);
     }
 
+   
+
     // 頂点レイアウト
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
         { // xyz座標(1行で書いたほうが見やすい)
@@ -962,13 +964,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //Input->Update();
 
         //// 数字の0キーが押されていたら
-        //if (key[DIK_0]) 
+        //if (key[DIK_0])
         //{
         //    OutputDebugStringA("Hit 0\n");  // 出力ウィンドウに「Hit 0」と表示
         //}
 
-        // DirectX毎フレーム処理　ここから
-        //static float red = 1.0f;
+        ////DirectX毎フレーム処理　ここから
+        //    static float red = 1.0f;
 
         //if (key[DIK_SPACE]) {
         //    red -= 0.01f;
@@ -996,6 +998,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //    if (key[DIK_RIGHT]) { object3ds[0].position.x += 1.0f; }
         //    else if (key[DIK_LEFT]) { object3ds[0].position.x -= 1.0f; }
         //}
+       
 
         // 全オブジェクトについて処理
         for (size_t i = 0; i < _countof(object3ds); i++)
