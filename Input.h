@@ -15,13 +15,20 @@ public://メンバ関数
 	//更新
 	void Update();
 
+	
+	bool PushKey(BYTE keyNumber);
+
+	bool TriggerKey(BYTE keyNumber);
+
 	template <class T>using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 private:
-	ComPtr<IDirectInput8> directInput;
-
 	// キーボードデバイスの生成
-	ComPtr<IDirectInputDevice8> keyboard;
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
+
+	BYTE key[256] = {};
+
+	BYTE keyPre[256] = {};
 
 };
 
