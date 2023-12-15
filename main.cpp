@@ -1,4 +1,5 @@
-﻿#include <d3d12.h>
+﻿
+#include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
 #include <vector>
@@ -6,14 +7,15 @@
 #include <DirectXMath.h>
 #include <DirectXTex.h>
 #include <d3dcompiler.h>
+
 #include <wrl.h>
 #include "Input.h"
 #include "WinApp.h"
 
-
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -196,15 +198,21 @@ void UploadSubresources(ID3D12Resource* texBuff, const ScratchImage& scratchImg)
 
 
 
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
-    //ポインタ
+    //input
     Input* input_ = nullptr;
     WinApp* winApp_ = nullptr;
 
+#pragma region WindowsAPI初期化処理
+
     winApp_ = new WinApp();
     winApp_->Initialize();
+
+
+#pragma endregion
 
 #pragma region DirectX初期化処理
     // DirectX初期化処理　ここから
@@ -332,7 +340,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ComPtr<IDXGISwapChain1> swapChain1;
     // スワップチェーンの生成
     result = dxgiFactory->CreateSwapChainForHwnd(
-        commandQueue.Get(),winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, &swapChain1);
+        commandQueue.Get(), winApp_->GetHwnd(), &swapChainDesc, nullptr, nullptr, &swapChain1);
     assert(SUCCEEDED(result));
 
     // SwapChain4を得る
@@ -420,9 +428,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // DirectX初期化処理　ここまで
 #pragma endregion
 
-    //Input生成
+    //初期化
     input_ = new Input();
-    input_->Initialize(winApp);
+    input_->Initialize(winApp_);
 
 #pragma region 描画初期化処理
 
@@ -893,17 +901,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     device->CreateShaderResourceView(texBuff2.Get(), &srvDesc, srvHandle);
 
     size_t textureIndex = 0;
-   
+
 
     // ゲームループ
     while (true) {
-        // メッセージがある？
-        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg); // キー入力メッセージの処理
-            DispatchMessage(&msg); // プロシージャにメッセージを送る
-        }
-        // ✖ボタンで終了メッセージが来たらゲームループを抜ける
-        if (msg.message == WM_QUIT) {
+
+        if (winApp_->Update() == true)
+        {
             break;
         }
 
@@ -915,7 +919,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             OutputDebugStringA("Hit 0\n");  // 出力ウィンドウに「Hit 0」と表示
         }
 
-        // //DirectX毎フレーム処理　ここから
+        // DirectX毎フレーム処理　ここから
         //static float red = 1.0f;
 
         //if (key[DIK_SPACE]) {
@@ -944,7 +948,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             if (input_->PushKey(DIK_RIGHT)) { object3ds[0].position.x += 1.0f; }
             else if (input_->PushKey(DIK_LEFT)) { object3ds[0].position.x -= 1.0f; }
         }
-
 
         // 全オブジェクトについて処理
         for (size_t i = 0; i < _countof(object3ds); i++)
@@ -1007,7 +1010,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 定数バッファビュー(CBV)の設定コマンド
         commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
         // SRVヒープの設定コマンド
-        ID3D12DescriptorHeap* descHeaps[] = {srvHeap.Get()};
+        ID3D12DescriptorHeap* descHeaps[] = { srvHeap.Get() };
         commandList->SetDescriptorHeaps(1, descHeaps);
         // SRVヒープの先頭ハンドルを取得（SRVを指しているはず）
         D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
@@ -1061,9 +1064,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     }
 
     delete input_;
+
+    winApp_->Finalize();
     delete winApp_;
-    // ウィンドウクラスを登録解除
-    UnregisterClass(winApp::lpszClassName,winApp::hInstance);
 
     return 0;
 }
